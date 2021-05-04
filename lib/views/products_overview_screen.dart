@@ -7,9 +7,16 @@ enum FilterOptions {
   All,
 }
 
-class ProductOverviewScreen extends StatelessWidget {
+class ProductOverviewScreen extends StatefulWidget {
   // const ProductOverviewScreen({Key key}) : super(key: key);
   //final List<Product> loadedProducts = myDummyProducts;
+
+  @override
+  _ProductOverviewScreenState createState() => _ProductOverviewScreenState();
+}
+
+class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
+  bool _favoritesOnly = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +35,18 @@ class ProductOverviewScreen extends StatelessWidget {
                 value: FilterOptions.All,
               )
             ],
-            onSelected: (value) {
-              print(value);
+            onSelected: (FilterOptions value) {
+              setState(() {
+                if (value == FilterOptions.FavoritesOnly)
+                  _favoritesOnly = true;
+                else
+                  _favoritesOnly = false;
+              });
             },
           ),
         ],
       ),
-      body: ProductGrid(),
+      body: ProductGrid(_favoritesOnly),
     );
   }
 }
