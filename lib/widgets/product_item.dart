@@ -12,8 +12,8 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     //listen: false => indica que o listener nao deve ser avisado dos eventos
     //muito util quando nao temos propriedades que sao afetadas por mudanças de outros atributos, evitando redraw de widget desnece//
-    // final Product product = Provider.of<Product>(context, listen: false);
-    final Product product = Provider.of<Product>(context);
+    // final Product product = Provider.of<Product>(context);
+    final Product product = Provider.of<Product>(context, listen: false);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -32,12 +32,18 @@ class ProductItem extends StatelessWidget {
         ),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
-          leading: IconButton(
-            icon: Icon(
-              product.isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: Theme.of(context).accentColor,
+          leading: Consumer<Product>(
+            //Consumer widget permite receber notificacao somente para este ponto da widget tree, sendo cirurgico quanto ao ponto de redraw
+            //atenção ao terceiro param child, aqui descartado com underline, mas que pode ser a exceção de redraw de um consumer
+            builder: (ctx, innerProduct, _) => IconButton(
+              icon: Icon(
+                innerProduct.isFavorite
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: Theme.of(context).accentColor,
+              ),
+              onPressed: () => product.toggleFavorite(),
             ),
-            onPressed: () => product.toggleFavorite(),
           ),
           title: Text(
             product.title,
