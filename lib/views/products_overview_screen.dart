@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shop/widgets/product_grid.dart';
 
+//enum tem que estar fora da classe
+enum FilterOptions {
+  FavoritesOnly,
+  All,
+}
+
 class ProductOverviewScreen extends StatelessWidget {
   // const ProductOverviewScreen({Key key}) : super(key: key);
   //final List<Product> loadedProducts = myDummyProducts;
@@ -15,11 +21,11 @@ class ProductOverviewScreen extends StatelessWidget {
             itemBuilder: (context) => [
               PopupMenuItem(
                 child: Text('Favoritos'),
-                value: 0,
+                value: FilterOptions.FavoritesOnly,
               ),
               PopupMenuItem(
                 child: Text('Todos'),
-                value: 1,
+                value: FilterOptions.All,
               )
             ],
             onSelected: (value) {
