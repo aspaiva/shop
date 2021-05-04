@@ -10,6 +10,9 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //listen: false => indica que o listener nao deve ser avisado dos eventos
+    //muito util quando nao temos propriedades que sao afetadas por mudanças de outros atributos, evitando redraw de widget desnece//
+    // final Product product = Provider.of<Product>(context, listen: false);
     final Product product = Provider.of<Product>(context);
 
     return ClipRRect(
