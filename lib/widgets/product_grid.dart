@@ -18,8 +18,11 @@ class ProductGrid extends StatelessWidget {
     return GridView.builder(
       itemCount: loadedProducts.length,
       padding: const EdgeInsets.all(10),
-      itemBuilder: (ctx, index) => ChangeNotifierProvider(
-        create: (_) => loadedProducts[index],
+      // itemBuilder: (ctx, index) => ChangeNotifierProvider(  //v0: usava create incorretamente, pois em reuso do provider deve-se usar o .value
+      //   create: (_) => loadedProducts[index],
+      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+        //conforme documentacao oficial: usar .value(value:) em vez de create: quando for reuso do provider
+        value: loadedProducts[index],
         child: ProductItem(),
       ),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
