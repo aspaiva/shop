@@ -33,7 +33,7 @@ class CartScreen extends StatelessWidget {
                       child: Text('COMPRAR'),
                       onPressed: () {
                         Provider.of<Orders>(context, listen: false)
-                            .addOrder(cartItems, cart.totalAmount);
+                            .addOrder(cart);
                         cart.clear();
                       },
                     ),
