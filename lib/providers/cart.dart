@@ -4,18 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:shop/providers/product.dart';
 
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items = {};
+  Map<String, CartItem> _cartItems = {};
   Map<String, CartItem> get items {
-    return {..._items};
+    return {..._cartItems};
   }
 
   int get itemCount {
-    return _items.length;
+    return _cartItems.length;
+  }
+
+  //double totalAmount() {  //method must have ()
+  //getters do not need ()
+  double get totalAmount {
+    double total = 0.0;
+    _cartItems.forEach((key, itemCart) {
+      total += itemCart.price * itemCart.quantity;
+    });
+    return total;
   }
 
   void addItem(Product product) {
-    if (_items.containsKey(product.id)) {
-      _items.update(
+    if (_cartItems.containsKey(product.id)) {
+      _cartItems.update(
         product.id,
         (existingItem) => CartItem(
           id: existingItem.id,
@@ -25,7 +35,7 @@ class Cart with ChangeNotifier {
         ),
       );
     } else
-      _items.putIfAbsent(
+      _cartItems.putIfAbsent(
         product.id,
         () => CartItem(
           id: Random()

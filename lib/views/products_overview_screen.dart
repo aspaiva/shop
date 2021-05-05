@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/cart.dart';
+import 'package:shop/utils/app_routes.dart';
 import 'package:shop/widgets/badge.dart';
 import 'package:shop/widgets/product_grid.dart';
 
@@ -53,7 +54,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
             child: IconButton(
               //este child representa o child que nao será redesenahado, conforme parmChild do builder a seguir
               icon: Icon(Icons.shopping_cart),
-              onPressed: null,
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.CART);
+              },
             ),
             builder: (ctx, parmCart, parmChild) => Badge(
               value: parmCart.itemCount.toString(),
