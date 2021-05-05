@@ -32,6 +32,7 @@ class Cart with ChangeNotifier {
           title: existingItem.title,
           quantity: existingItem.quantity + 1,
           price: existingItem.price,
+          productId: product.id,
         ),
       );
     } else
@@ -44,21 +45,29 @@ class Cart with ChangeNotifier {
           title: product.title,
           quantity: 1,
           price: product.price,
+          productId: product.id,
         ),
       );
 
+    notifyListeners();
+  }
+
+  void removeCartItem(String productId) {
+    _cartItems.remove(productId);
     notifyListeners();
   }
 }
 
 class CartItem {
   String id;
+  String productId;
   String title;
   int quantity;
   double price;
 
   CartItem({
     @required this.id,
+    @required this.productId,
     @required this.title,
     @required this.quantity,
     @required this.price,
