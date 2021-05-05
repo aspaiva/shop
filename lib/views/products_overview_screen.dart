@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop/providers/cart.dart';
+import 'package:shop/widgets/badge.dart';
 import 'package:shop/widgets/product_grid.dart';
 
 //enum tem que estar fora da classe
@@ -20,6 +23,8 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cart = Provider.of<Cart>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Minha loja'),
@@ -43,6 +48,18 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
                   _favoritesOnly = false;
               });
             },
+          ),
+          Consumer<Cart>(
+            child: IconButton(
+              //este child representa o child que nao será redesenahado, conforme parmChild do builder a seguir
+              icon: Icon(Icons.shopping_cart),
+              onPressed: null,
+            ),
+            builder: (ctx, parmCart, parmChild) => Badge(
+              value: parmCart.itemCount.toString(),
+              cor: Colors.orange,
+              child: parmChild,
+            ),
           ),
         ],
       ),
