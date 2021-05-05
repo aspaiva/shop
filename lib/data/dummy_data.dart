@@ -1,4 +1,4 @@
-import '../models/product.dart';
+import '../providers/product.dart';
 
 //NAO SERÁ CONST porque tem um field que é bool, nao required, nao final na classe product
 final myDummyProducts = [

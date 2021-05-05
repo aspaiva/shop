@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop/data/dummy_data.dart';
-import 'package:shop/models/product.dart';
+import 'package:shop/providers/product.dart';
 
 //ChangeNotifier é um MIXIN nativo do Flutter para o design pattern OBSERVER
 class Products with ChangeNotifier {
