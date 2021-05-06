@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/cart.dart';
@@ -57,8 +59,18 @@ class ProductItem extends StatelessWidget {
               color: Theme.of(context).accentColor,
             ),
             onPressed: () {
+              Scaffold.of(context).hideCurrentSnackBar();
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('Produto adicionado!'),
+                duration: Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: 'DESFAZER',
+                  onPressed: () {
+                    cart.removeSingleItem(product.id);
+                  },
+                ),
+              ));
               cart.addItem(product);
-              // print(cart.itemCount);
             },
           ),
         ),
