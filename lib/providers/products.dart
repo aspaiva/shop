@@ -19,4 +19,22 @@ class Products with ChangeNotifier {
     _items.add(product); //Um evento relevante
     notifyListeners(); //aviso aos subscribers/observers/listeners
   }
+
+  void updateProduct(Product produto) {
+    if (produto == null || produto.id.isEmpty) return;
+
+    final index = _items.indexWhere((element) => element.id == produto.id);
+
+    if (index >= 0) {
+      _items[index] = produto;
+      notifyListeners();
+    }
+  }
+
+  void deleteProduct(String id) {
+    if (_items.indexWhere((element) => element.id == id) >= 0) {
+      _items.removeWhere((element) => element.id == id);
+      notifyListeners();
+    }
+  }
 }

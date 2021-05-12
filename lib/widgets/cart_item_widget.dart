@@ -54,13 +54,13 @@ class CartItemWidget extends StatelessWidget {
             title: Text('Exclusão do item'),
             content: Text('Confirma exclusão do item?'),
             actions: [
-              FlatButton(
+              ElevatedButton(
                 child: Text('Não'),
                 onPressed: () {
                   Navigator.of(ctx).pop(false);
                 },
               ),
-              FlatButton(
+              ElevatedButton(
                 child: Text('Sim'),
                 onPressed: () {
                   Navigator.of(ctx).pop(true);

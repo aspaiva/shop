@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +18,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _urlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    //fill only if first time here
+    if (_formData.isEmpty) {
+      //get the argument passed by navigator.of.pushNamed
+      final produto = ModalRoute.of(context).settings.arguments as Product;
+
+      _formData['price'] = "0.00"; //default value avoid erros on new product
+
+      //what if is a new product and there is no arguments?
+      if (produto != null) {
+        _formData['id'] = produto.id;
+        _formData['title'] = produto.title;
+        _formData['price'] = produto.price.toString();
+        _formData['description'] = produto.description;
+        _formData['imageUrl'] = produto.imageUrl;
+
+        _urlController.text = produto.imageUrl;
+      }
+    }
+  }
 
   void _updateImage() {
     if (_isValidUrl(_urlController.text)) setState(() {});
@@ -44,18 +66,22 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   void _saveForm() {
     if (!_formKey.currentState.validate()) return;
 
-    _formKey.currentState.save();
+    _formKey.currentState.save(); //popula _formData com dados dos controles
 
-    Provider.of<Products>(context, listen: false).addProduct(Product(
-      // id: Random().nextDouble().toString(),
+    final produto = new Product(
+      id: _formData['id'],
       title: _formData['title'],
       description: _formData['description'],
       price: _formData['price'],
       imageUrl: _formData['imageUrl'],
-    ));
+    );
 
-    print('Saving...');
-    print(_formData);
+    final products = Provider.of<Products>(context, listen: false);
+    if (produto.id.isEmpty)
+      products.addProduct(produto);
+    else
+      products.updateProduct(produto);
+
     Navigator.of(context).pop();
   }
 
@@ -90,8 +116,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _formData['title'],
                 decoration: InputDecoration(
-                  labelText: 'Produto',
+                  labelText: 'Título do Produto',
                 ),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (value) {
@@ -112,7 +139,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 decoration: InputDecoration(
                   labelText: 'Preço',
                 ),
-                initialValue: "0.00",
+                initialValue: _formData['price'],
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
                 focusNode: _priceFocus,
@@ -130,6 +157,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _formData['description'],
                 decoration: InputDecoration(labelText: 'Descrição'),
                 keyboardType: TextInputType.multiline,
                 maxLines: 3,
@@ -149,6 +177,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      // initialValue: _formData['imageUrl'],
+                      // initialValue: _urlController.text,
                       decoration: InputDecoration(labelText: 'URL da imagem'),
                       keyboardType: TextInputType.url,
                       focusNode: _urlFocus,
