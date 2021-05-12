@@ -22,7 +22,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formData = Map<String, Object>();
 
   void _updateImage() {
-    setState(() {});
+    if (_isValidUrl(_urlController.text)) setState(() {});
   }
 
   @override
@@ -57,6 +57,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     print('Saving...');
     print(_formData);
     Navigator.of(context).pop();
+  }
+
+  bool _isValidUrl(String value) {
+    if (value.isEmpty) return false;
+    if (!value.contains("http://") && !value.contains('https://')) return false;
+    if (!value.endsWith('.jpg') &&
+        !value.endsWith('.png') &&
+        !value.endsWith('.jpeg') &&
+        !value.endsWith('.svg')) return false;
+    return true;
   }
 
   @override
@@ -159,6 +169,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                           return "Use uma extensão de imagem jpg, jpeg, png ou svg";
                         return null;
                       },
+                      onChanged: (value) {
+                        setState(() {
+                          _urlController.text = value;
+                        });
+                      },
                     ),
                   ),
                   Container(
@@ -172,7 +187,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         width: 1,
                       ),
                     ),
-                    child: _urlController.text.isEmpty
+                    child: !_isValidUrl(_urlController.text)
                         ? Text('URL ??')
                         : FittedBox(
                             child: Image.network(
