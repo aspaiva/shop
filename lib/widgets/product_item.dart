@@ -14,9 +14,18 @@ class ProductItem extends StatelessWidget {
       ),
       title: Text(produto.title),
       subtitle: Text(produto.description),
-      trailing: IconButton(
-        icon: Icon(Icons.edit),
-        onPressed: () {},
+      trailing: Container(
+        width: 100,
+        child: Row(children: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {},
+          ),
+        ]),
       ),
     );
   }
