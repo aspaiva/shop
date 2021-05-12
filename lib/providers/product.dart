@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 //Product passa a ser também um provider com recursos de notifier (um subject)
 class Product with ChangeNotifier {
-  final String id;
+  String id;
   final String title;
   final String description;
   final double price;

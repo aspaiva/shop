@@ -47,7 +47,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _formKey.currentState.save();
 
     Provider.of<Products>(context, listen: false).addProduct(Product(
-      id: Random().nextDouble().toString(),
+      // id: Random().nextDouble().toString(),
       title: _formData['title'],
       description: _formData['description'],
       price: _formData['price'],
