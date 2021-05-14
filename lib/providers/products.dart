@@ -6,6 +6,8 @@ import 'package:shop/providers/product.dart';
 
 //ChangeNotifier é um MIXIN nativo do Flutter para o design pattern OBSERVER
 class Products with ChangeNotifier {
+  final String _url =
+      'https://flutter-cod3r-95cce-default-rtdb.firebaseio.com/products';
   List<Product> _items = myDummyProducts;
 
   List<Product> get items => [..._items]; //spread operator ...
@@ -14,13 +16,10 @@ class Products with ChangeNotifier {
     return items.where((prod) => prod.isFavorite).toList();
   }
 
-  Future<void> addProduct(Product product) {
-    const url =
-        'https://flutter-cod3r-95cce-default-rtdb.firebaseio.com/products.json';
-
-    return post(
+  Future<void> addProduct(Product product) async {
+    final response = await post(
       //post = set, include, add
-      url,
+      _url,
       body: json.encode({
         'title': product.title,
         'description': product.description,
@@ -28,18 +27,14 @@ class Products with ChangeNotifier {
         'imageUrl': product.imageUrl,
         'isFavorite': product.isFavorite,
       }),
-    ).then((response) {
-      product.id = json.decode(response.body)['name'];
-      _items.add(product); //Um evento relevante
-      notifyListeners(); //aviso aos subscribers/observers/listeners
-    });
-    // .catchError((onError) {
-    //   print(onError);
-    //   throw onError;
-    // })
+    );
+
+    product.id = json.decode(response.body)['name'];
+    _items.add(product); //Um evento relevante
+    notifyListeners(); //aviso aos subscribers/observers/listeners
   }
 
-  Future<void> updateProduct(Product produto) {
+  Future<void> updateProduct(Product produto) async {
     if (produto == null || produto.id.isEmpty) return Future<void>(null);
     final index = _items.indexWhere((element) => element.id == produto.id);
     if (index >= 0) {

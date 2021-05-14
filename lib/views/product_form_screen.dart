@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -40,14 +42,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         _formData['imageUrl'] = produto.imageUrl;
 
         _urlController.text = produto.imageUrl;
+      } else {
+        _formData['title'] = "Novo produto ${Random().nextDouble().toString()}";
+        _formData['price'] = 123.45;
+        _formData['description'] = "Nova description para meu novo produto";
+        _urlController.text =
+            "https://cdn.pixabay.com/photo/2018/07/11/21/51/toast-3532016_1280.jpg";
       }
-      // else {
-      //   _formData['title'] = "Novo produto ${Random().nextDouble().toString()}";
-      //   _formData['price'] = 123.45;
-      //   _formData['description'] = "Nova description para meu novo produto";
-      //   _urlController.text =
-      //       "https://cdn.pixabay.com/photo/2018/07/11/21/51/toast-3532016_1280.jpg";
-      // }
     }
   }
 
@@ -71,7 +72,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     _urlFocus.dispose();
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save(); //popula _formData com dados dos controles
@@ -90,39 +91,35 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     final products = Provider.of<Products>(context, listen: false);
     if (produto.id == null) {
-      products.addProduct(produto).then((value) {
+      try {
+        await products.addProduct(produto);
+        // as proximas linhas só são chamadas se o await acima for bem sucedido
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Gravado com sucesso')));
-        setState(() {
-          _isLoading = false;
-        });
         Navigator.of(context)
-            .pop(); //so volto para a tela anterior se der certo
-      }).onError((error, stackTrace) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Ocorreu um erro ao gravar'),
-          behavior: SnackBarBehavior.floating,
-        ));
-        return showDialog(
+            .pop(); //fecha a screen atual e cai na próxima da pilha
+      } catch (e) {
+        await showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             title: Text('Ocorreu um error'),
-            content: Text(error.toString()),
+            content: Text(e.toString()),
             actions: [
               ElevatedButton(
-                onPressed: () {
-                  // setState(() {
-                  //   _isLoading = false;
-                  // });
-                  return Navigator.of(context)
-                      .pop(); //not working with/out setState
-                },
                 child: Text('Ok'),
+                onPressed: () {
+                  return Navigator.of(context)
+                      .pop(); //Fecha o popup, nao a Screen atual
+                },
               )
             ],
           ),
         );
-      });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } else {
       products.updateProduct(produto).then((value) {
         setState(() {
