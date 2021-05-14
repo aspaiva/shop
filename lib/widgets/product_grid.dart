@@ -19,22 +19,32 @@ class ProductGrid extends StatelessWidget {
         ? productsProvider.favoriteItems
         : productsProvider.items;
 
-    return GridView.builder(
-      itemCount: loadedProducts.length,
-      padding: const EdgeInsets.all(10),
-      // itemBuilder: (ctx, index) => ChangeNotifierProvider(  //v0: usava create incorretamente, pois em reuso do provider deve-se usar o .value
-      //   create: (_) => loadedProducts[index],
-      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-        //conforme documentacao oficial: usar .value(value:) em vez de create: quando for reuso do provider
-        value: loadedProducts[index],
-        child: ProductGridItem(),
-      ),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        // childAspectRatio: 3 / 2,
-        crossAxisSpacing: 5,
-        mainAxisSpacing: 10,
-      ),
-    );
+    return loadedProducts.isEmpty
+        ? Center(
+            child: Text(
+              'A lista não possui produtos',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).errorColor),
+            ),
+          )
+        : GridView.builder(
+            itemCount: loadedProducts.length,
+            padding: const EdgeInsets.all(10),
+            // itemBuilder: (ctx, index) => ChangeNotifierProvider(  //v0: usava create incorretamente, pois em reuso do provider deve-se usar o .value
+            //   create: (_) => loadedProducts[index],
+            itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
+              //conforme documentacao oficial: usar .value(value:) em vez de create: quando for reuso do provider
+              value: loadedProducts[index],
+              child: ProductGridItem(),
+            ),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              // childAspectRatio: 3 / 2,
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 10,
+            ),
+          );
   }
 }

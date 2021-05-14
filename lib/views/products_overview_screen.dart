@@ -23,17 +23,22 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _favoritesOnly = false;
+  bool _isloading = true; //entra como loading...
 
   @override
   void initState() {
     super.initState();
-    Provider.of<Products>(context, listen: false).loadProductsFromCloud();
+    Provider.of<Products>(context, listen: false)
+        .loadProductsFromCloud()
+        .then((value) {
+      setState(() {
+        _isloading = false;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // final cart = Provider.of<Cart>(context, listen: false);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Minha loja'),
@@ -75,7 +80,19 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductGrid(_favoritesOnly),
+      body: _isloading
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Carregando lista de produtos...',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Divider(height: 30),
+                CircularProgressIndicator(),
+              ],
+            )
+          : ProductGrid(_favoritesOnly),
     );
   }
 }
