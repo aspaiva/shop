@@ -90,50 +90,37 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     });
 
     final products = Provider.of<Products>(context, listen: false);
-    if (produto.id == null) {
-      try {
+    try {
+      if (produto.id == null) {
         await products.addProduct(produto);
-        // as proximas linhas só são chamadas se o await acima for bem sucedido
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Gravado com sucesso')));
-        Navigator.of(context)
-            .pop(); //fecha a screen atual e cai na próxima da pilha
-      } catch (e) {
-        await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('Ocorreu um error'),
-            content: Text(e.toString()),
-            actions: [
-              ElevatedButton(
-                child: Text('Ok'),
-                onPressed: () {
-                  return Navigator.of(context)
-                      .pop(); //Fecha o popup, nao a Screen atual
-                },
-              )
-            ],
-          ),
-        );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
+      } else {
+        await products.updateProduct(produto);
       }
-    } else {
-      products.updateProduct(produto).then((value) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Alterado com sucesso')));
-        Navigator.of(context).pop();
-      }).onError((error, stackTrace) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Erro ao alterar')));
-        setState(() {
-          _isLoading = false;
-        });
+      // as proximas linhas só são chamadas se o await acima for bem sucedido
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Gravado com sucesso')));
+      Navigator.of(context)
+          .pop(); //fecha a screen atual e cai na próxima da pilha
+    } catch (e) {
+      await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Ocorreu um error'),
+          content: Text(e.toString()),
+          actions: [
+            ElevatedButton(
+              child: Text('Ok'),
+              onPressed: () {
+                return Navigator.of(context)
+                    .pop(); //Fecha o popup, nao a Screen atual
+              },
+            )
+          ],
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }

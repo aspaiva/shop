@@ -59,6 +59,16 @@ class Products with ChangeNotifier {
     if (produto == null || produto.id.isEmpty) return Future<void>(null);
     final index = _items.indexWhere((element) => element.id == produto.id);
     if (index >= 0) {
+      await patch(
+        '$_baseUrl/${produto.id}.json',
+        body: json.encode({
+          'title': produto.title,
+          'description': produto.description,
+          'price': produto.price,
+          'imageUrl': produto
+              .imageUrl, //nao pegou isFavorite pq nao sofre alteracao no form
+        }),
+      );
       _items[index] = produto;
       notifyListeners();
     }
