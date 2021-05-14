@@ -18,6 +18,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _urlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -34,12 +35,19 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       if (produto != null) {
         _formData['id'] = produto.id;
         _formData['title'] = produto.title;
-        _formData['price'] = produto.price.toString();
+        _formData['price'] = produto.price;
         _formData['description'] = produto.description;
         _formData['imageUrl'] = produto.imageUrl;
 
         _urlController.text = produto.imageUrl;
       }
+      // else {
+      //   _formData['title'] = "Novo produto ${Random().nextDouble().toString()}";
+      //   _formData['price'] = 123.45;
+      //   _formData['description'] = "Nova description para meu novo produto";
+      //   _urlController.text =
+      //       "https://cdn.pixabay.com/photo/2018/07/11/21/51/toast-3532016_1280.jpg";
+      // }
     }
   }
 
@@ -76,13 +84,61 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       imageUrl: _formData['imageUrl'],
     );
 
-    final products = Provider.of<Products>(context, listen: false);
-    if (produto.id.isEmpty)
-      products.addProduct(produto);
-    else
-      products.updateProduct(produto);
+    setState(() {
+      _isLoading = true;
+    });
 
-    Navigator.of(context).pop();
+    final products = Provider.of<Products>(context, listen: false);
+    if (produto.id == null) {
+      products.addProduct(produto).then((value) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Gravado com sucesso')));
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context)
+            .pop(); //so volto para a tela anterior se der certo
+      }).onError((error, stackTrace) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Ocorreu um erro ao gravar'),
+          behavior: SnackBarBehavior.floating,
+        ));
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Ocorreu um error'),
+            content: Text(error.toString()),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  // setState(() {
+                  //   _isLoading = false;
+                  // });
+                  return Navigator.of(context)
+                      .pop(); //not working with/out setState
+                },
+                child: Text('Ok'),
+              )
+            ],
+          ),
+        );
+      });
+    } else {
+      products.updateProduct(produto).then((value) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Alterado com sucesso')));
+        Navigator.of(context).pop();
+      }).onError((error, stackTrace) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Erro ao alterar')));
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
   }
 
   bool _isValidUrl(String value) {
@@ -109,130 +165,138 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           )
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(15),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _formData['title'],
-                decoration: InputDecoration(
-                  labelText: 'Título do Produto',
-                ),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (value) {
-                  Focus.of(context).requestFocus(_priceFocus);
-                },
-                onSaved: (newValue) {
-                  print('Salvou Produto: $newValue');
-                  _formData['title'] = newValue;
-                },
-                validator: (value) {
-                  if (value.isEmpty) return "Informe o título";
-                  if (value.length < 5)
-                    return "Título deve ter 5 ou mais caracteres";
-                  return null;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Preço',
-                ),
-                initialValue: _formData['price'],
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                textInputAction: TextInputAction.next,
-                focusNode: _priceFocus,
-                onFieldSubmitted: (value) =>
-                    Focus.of(context).requestFocus(_descriptionFocus),
-                onSaved: (newValue) {
-                  print('salvou Preco: ${newValue.toString()}');
-                  _formData['price'] = double.parse(newValue);
-                },
-                validator: (value) {
-                  if (double.parse(value) <= 0)
-                    return "Preço deve ser maior que zero";
-
-                  return null;
-                },
-              ),
-              TextFormField(
-                initialValue: _formData['description'],
-                decoration: InputDecoration(labelText: 'Descrição'),
-                keyboardType: TextInputType.multiline,
-                maxLines: 3,
-                focusNode: _descriptionFocus,
-                onFieldSubmitted: (_) =>
-                    Focus.of(context).requestFocus(_urlFocus),
-                onSaved: (newValue) => _formData['description'] = newValue,
-                validator: (value) {
-                  if (value.isEmpty) return "Description deve ser preenchida";
-                  if (value.length < 15)
-                    return "Description deve ser maior que 15 caracteres";
-                  return null;
-                },
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      // initialValue: _formData['imageUrl'],
-                      // initialValue: _urlController.text,
-                      decoration: InputDecoration(labelText: 'URL da imagem'),
-                      keyboardType: TextInputType.url,
-                      focusNode: _urlFocus,
-                      controller: _urlController,
-                      onFieldSubmitted: (_) {
-                        _saveForm();
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : Padding(
+              padding: EdgeInsets.all(15),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    TextFormField(
+                      initialValue: _formData['title'],
+                      decoration: InputDecoration(
+                        labelText: 'Título do Produto',
+                      ),
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: (value) {
+                        Focus.of(context).requestFocus(_priceFocus);
                       },
-                      onSaved: (newValue) => _formData['imageUrl'] = newValue,
+                      onSaved: (newValue) {
+                        print('Salvou Produto: $newValue');
+                        _formData['title'] = newValue;
+                      },
                       validator: (value) {
-                        if (value.isEmpty) return "informe a url da imagem";
-                        if (!value.contains("http://") &&
-                            !value.contains('https://'))
-                          return "Informe o protocolo http ou https";
-                        if (!value.endsWith('.jpg') &&
-                            !value.endsWith('.png') &&
-                            !value.endsWith('.jpeg') &&
-                            !value.endsWith('.svg'))
-                          return "Use uma extensão de imagem jpg, jpeg, png ou svg";
+                        if (value.isEmpty) return "Informe o título";
+                        if (value.length < 5)
+                          return "Título deve ter 5 ou mais caracteres";
                         return null;
                       },
-                      onChanged: (value) {
-                        setState(() {
-                          _urlController.text = value;
-                        });
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Preço',
+                      ),
+                      initialValue: _formData['price'].toString(),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      textInputAction: TextInputAction.next,
+                      focusNode: _priceFocus,
+                      onFieldSubmitted: (value) =>
+                          Focus.of(context).requestFocus(_descriptionFocus),
+                      onSaved: (newValue) {
+                        print('salvou Preco: ${newValue.toString()}');
+                        _formData['price'] = double.parse(newValue);
+                      },
+                      validator: (value) {
+                        if (double.parse(value) <= 0)
+                          return "Preço deve ser maior que zero";
+
+                        return null;
                       },
                     ),
-                  ),
-                  Container(
-                    width: 100,
-                    height: 100,
-                    margin: EdgeInsets.only(left: 5, top: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 1,
-                      ),
+                    TextFormField(
+                      initialValue: _formData['description'],
+                      decoration: InputDecoration(labelText: 'Descrição'),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 3,
+                      focusNode: _descriptionFocus,
+                      onFieldSubmitted: (_) =>
+                          Focus.of(context).requestFocus(_urlFocus),
+                      onSaved: (newValue) =>
+                          _formData['description'] = newValue,
+                      validator: (value) {
+                        if (value.isEmpty)
+                          return "Description deve ser preenchida";
+                        if (value.length < 15)
+                          return "Description deve ser maior que 15 caracteres";
+                        return null;
+                      },
                     ),
-                    child: !_isValidUrl(_urlController.text)
-                        ? Text('URL ??')
-                        : FittedBox(
-                            child: Image.network(
-                              _urlController.text,
-                              fit: BoxFit.cover,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            // initialValue: _formData['imageUrl'],
+                            // initialValue: _urlController.text,
+                            decoration:
+                                InputDecoration(labelText: 'URL da imagem'),
+                            keyboardType: TextInputType.url,
+                            focusNode: _urlFocus,
+                            controller: _urlController,
+                            onFieldSubmitted: (_) {
+                              _saveForm();
+                            },
+                            onSaved: (newValue) =>
+                                _formData['imageUrl'] = newValue,
+                            validator: (value) {
+                              if (value.isEmpty)
+                                return "informe a url da imagem";
+                              if (!value.contains("http://") &&
+                                  !value.contains('https://'))
+                                return "Informe o protocolo http ou https";
+                              if (!value.endsWith('.jpg') &&
+                                  !value.endsWith('.png') &&
+                                  !value.endsWith('.jpeg') &&
+                                  !value.endsWith('.svg'))
+                                return "Use uma extensão de imagem jpg, jpeg, png ou svg";
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                _urlController.text = value;
+                              });
+                            },
+                          ),
+                        ),
+                        Container(
+                          width: 100,
+                          height: 100,
+                          margin: EdgeInsets.only(left: 5, top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1,
                             ),
                           ),
-                    alignment: Alignment.center,
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
+                          child: !_isValidUrl(_urlController.text)
+                              ? Text('URL ??')
+                              : Image.network(
+                                  _urlController.text,
+                                  fit: BoxFit.cover,
+                                ),
+                          alignment: Alignment.center,
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }

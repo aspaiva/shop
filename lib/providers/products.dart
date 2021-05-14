@@ -1,6 +1,6 @@
-import 'dart:math';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:shop/data/dummy_data.dart';
 import 'package:shop/providers/product.dart';
 
@@ -14,21 +14,39 @@ class Products with ChangeNotifier {
     return items.where((prod) => prod.isFavorite).toList();
   }
 
-  void addProduct(Product product) {
-    product.id = Random().nextDouble().toString();
-    _items.add(product); //Um evento relevante
-    notifyListeners(); //aviso aos subscribers/observers/listeners
+  Future<void> addProduct(Product product) {
+    const url =
+        'https://flutter-cod3r-95cce-default-rtdb.firebaseio.com/products';
+
+    return post(
+      //post = set, include, add
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'price': product.price,
+        'imageUrl': product.imageUrl,
+        'isFavorite': product.isFavorite,
+      }),
+    ).then((response) {
+      product.id = json.decode(response.body)['name'];
+      _items.add(product); //Um evento relevante
+      notifyListeners(); //aviso aos subscribers/observers/listeners
+    });
+    // .catchError((onError) {
+    //   print(onError);
+    //   throw onError;
+    // })
   }
 
-  void updateProduct(Product produto) {
-    if (produto == null || produto.id.isEmpty) return;
-
+  Future<void> updateProduct(Product produto) {
+    if (produto == null || produto.id.isEmpty) return Future<void>(null);
     final index = _items.indexWhere((element) => element.id == produto.id);
-
     if (index >= 0) {
       _items[index] = produto;
       notifyListeners();
     }
+    return Future<void>(null);
   }
 
   void deleteProduct(String id) {
