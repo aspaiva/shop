@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shop/providers/product.dart';
+import 'package:shop/utils/globals.dart';
 
 //ChangeNotifier é um MIXIN nativo do Flutter para o design pattern OBSERVER
 class Products with ChangeNotifier {
-  final String _baseUrl =
-      'https://flutter-cod3r-95cce-default-rtdb.firebaseio.com/products';
+  final String _baseUrl = Globals.baseUrl;
+
   List<Product> _items = [];
 
   Future<void> loadProductsFromCloud() async {

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
+import '../utils/globals.dart';
 
 //Product passa a ser também um provider com recursos de notifier (um subject)
 class Product with ChangeNotifier {
@@ -20,6 +24,14 @@ class Product with ChangeNotifier {
 
   void toggleFavorite() {
     isFavorite = !isFavorite; //Evento: sempre que o estado do favorito mudar...
+
+    patch(
+      '${Globals.baseUrl}/${this.id}.json',
+      body: json.encode(
+        {'isFavorite': isFavorite},
+      ),
+    );
+
     notifyListeners(); //avisar aos interessados (observers)
   }
 }
