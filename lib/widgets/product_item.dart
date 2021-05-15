@@ -48,7 +48,22 @@ class ProductItem extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         Provider.of<Products>(context, listen: false)
-                            .deleteProduct(produto.id);
+                            .deleteProduct(produto.id)
+                            .onError((error, stackTrace) {
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: Text('Erro'),
+                              content: Text(error.toString()),
+                              actions: [
+                                ElevatedButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: Text('Fechar'))
+                              ],
+                            ),
+                          );
+                        });
                         Navigator.of(context)
                             .pop(true); //true caso queira usar o then do future
                       },
@@ -58,14 +73,14 @@ class ProductItem extends StatelessWidget {
                 ),
               ).then((value) {
                 if (value) {
-                  Scaffold.of(context).showSnackBar(SnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text('Produto excluído'),
                     duration: Duration(seconds: 2),
                   ));
 
                   //pode testar se ainda tem produto e se a lista estiver vazia pode navegar para outra tela
                 }
-              });
+              }).onError((error, stackTrace) => null);
             },
           ),
         ]),

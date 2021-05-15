@@ -75,10 +75,16 @@ class Products with ChangeNotifier {
     return Future<void>(null);
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
     if (_items.indexWhere((element) => element.id == id) >= 0) {
-      _items.removeWhere((element) => element.id == id);
-      notifyListeners();
+      final response = await delete('$_baseUrl/$id');
+
+      if (response.statusCode == 200) {
+        _items.removeWhere((element) => element.id == id);
+        notifyListeners();
+      } else {
+        throw 'Erro ao deletar na nuvem: ${response.body} com statusCode=${response.statusCode}';
+      }
     }
   }
 }
