@@ -57,8 +57,8 @@ class ProductGridItem extends StatelessWidget {
               color: Theme.of(context).accentColor,
             ),
             onPressed: () {
-              Scaffold.of(context).hideCurrentSnackBar();
-              Scaffold.of(context).showSnackBar(SnackBar(
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Produto adicionado!'),
                 duration: Duration(seconds: 2),
                 action: SnackBarAction(

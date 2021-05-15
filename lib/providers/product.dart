@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../utils/globals.dart';
 
@@ -22,16 +23,29 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  void toggleFavorite() {
+  void _toggleFavorite() {
     isFavorite = !isFavorite; //Evento: sempre que o estado do favorito mudar...
-
-    patch(
-      '${Globals.baseUrl}/${this.id}.json',
-      body: json.encode(
-        {'isFavorite': isFavorite},
-      ),
-    );
-
     notifyListeners(); //avisar aos interessados (observers)
+  }
+
+  Future<void> toggleFavorite() async {
+    _toggleFavorite();
+
+    try {
+      final response = await patch(
+        '${Globals.baseUrl}/${this.id}.json',
+        body: json.encode(
+          {'isFavorite': isFavorite},
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        //rollback erro http
+        _toggleFavorite();
+      }
+    } catch (error) {
+      //rollback qq erro
+      _toggleFavorite();
+    }
   }
 }
