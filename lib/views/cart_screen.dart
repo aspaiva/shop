@@ -29,14 +29,7 @@ class CartScreen extends StatelessWidget {
                     SizedBox(width: 20),
                     Chip(label: Text(cart.totalAmount.toStringAsFixed(2))),
                     Spacer(),
-                    ElevatedButton(
-                      child: Text('COMPRAR'),
-                      onPressed: () {
-                        Provider.of<Orders>(context, listen: false)
-                            .addOrder(cart);
-                        cart.clear();
-                      },
-                    ),
+                    OrderButton(cart: cart),
                   ]),
             ),
           ),
@@ -51,6 +44,56 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      child: _isLoading ? CircularProgressIndicator() : Text('COMPRAR'),
+      onPressed: widget.cart.totalAmount == 0
+          ? null //sem produto no carrinho, botao sem retorno
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+
+              await Provider.of<Orders>(context, listen: false)
+                  .addOrder(widget.cart)
+                  .then((value) => ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Pedido gravado'))))
+                  .onError((error, stackTrace) => showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            content: Text(error.toString()),
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(false),
+                                  child: Text('Fechar'))
+                            ],
+                          )));
+              widget.cart.clear();
+              setState(() {
+                _isLoading = false;
+              });
+            },
     );
   }
 }

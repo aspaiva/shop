@@ -6,12 +6,12 @@ import 'package:shop/utils/globals.dart';
 
 //ChangeNotifier é um MIXIN nativo do Flutter para o design pattern OBSERVER
 class Products with ChangeNotifier {
-  final String _baseUrl = Globals.baseUrl;
+  final String _baseUrlProducts = '${Globals.baseUrl}/products';
 
   List<Product> _items = [];
 
   Future<void> loadProductsFromCloud() async {
-    final response = await get('$_baseUrl.json');
+    final response = await get('$_baseUrlProducts.json');
     Map<String, dynamic> dados = json.decode(response.body);
 
     _items.clear();
@@ -41,7 +41,7 @@ class Products with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     final response = await post(
       //post = set, include, add
-      '$_baseUrl.json',
+      '$_baseUrlProducts.json',
       body: json.encode({
         'title': product.title,
         'description': product.description,
@@ -61,7 +61,7 @@ class Products with ChangeNotifier {
     final index = _items.indexWhere((element) => element.id == produto.id);
     if (index >= 0) {
       await patch(
-        '$_baseUrl/${produto.id}.json',
+        '$_baseUrlProducts/${produto.id}.json',
         body: json.encode({
           'title': produto.title,
           'description': produto.description,
@@ -78,7 +78,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     if (_items.indexWhere((element) => element.id == id) >= 0) {
-      final response = await delete('$_baseUrl/$id');
+      final response = await delete('$_baseUrlProducts/$id');
 
       if (response.statusCode == 200) {
         _items.removeWhere((element) => element.id == id);

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shop/providers/orders.dart';
@@ -39,7 +41,8 @@ class _OrderWidgetState extends State<OrderWidget> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(product.title),
+                  Text(product.title
+                      .substring(0, min(25, product.title.length))),
                   Text(
                       '${product.quantity} x R\$ ${product.price} = ${product.quantity * product.price}'),
                 ],
