@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:shop/providers/cart.dart';
 import 'package:shop/utils/globals.dart';
 import 'package:http/http.dart' as http;

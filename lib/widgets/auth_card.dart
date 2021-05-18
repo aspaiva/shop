@@ -1,6 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop/providers/auth.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -22,7 +22,7 @@ class _AuthCardState extends State<AuthCard> {
     'password': '',
   };
 
-  void _onSubmit() {
+  Future<void> _onSubmit() async {
     setState(() {
       _isLoading = true;
     });
@@ -36,10 +36,12 @@ class _AuthCardState extends State<AuthCard> {
     _formKey.currentState.save();
     // sleep(Duration(seconds: 3));
 
+    Auth auth = Provider.of(context, listen: false);
+
     if (_authMode == AuthMode.Login) {
-      //login
+      await auth.login(_authData['email'], _authData['password']);
     } else {
-      //registra
+      await auth.cadastrarUsuario(_authData['email'], _authData['password']);
     }
 
     setState(() {
@@ -62,7 +64,7 @@ class _AuthCardState extends State<AuthCard> {
       elevation: 8.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
-        height: _authMode == AuthMode.Login ? 310 : 350,
+        height: _authMode == AuthMode.Login ? 310 : 360,
         width: MediaQuery.of(context).size.width * 0.75,
         padding: EdgeInsets.all(10.0),
         child: Form(
@@ -94,11 +96,11 @@ class _AuthCardState extends State<AuthCard> {
               ),
               if (_authMode == AuthMode.Signup)
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Senha (validação)'),
+                  decoration: InputDecoration(labelText: 'Senha (confirmação)'),
                   obscureText: true, //ocultar o texto
                   validator: (value) {
                     if (value != _passwordController.text)
-                      return "Senha está diferente da anterior";
+                      return "Senhas estão diferentes";
 
                     return null; //no error
                   },
