@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:shop/exceptions/auth_exception.dart';
 import 'package:shop/utils/globals.dart';
 
 //usando o mixin ChangeNotifier para criar o PROVIDER
@@ -19,16 +20,23 @@ class Auth with ChangeNotifier {
           "returnSecureToken": true,
         }));
 
-    print(json.decode(response.body)['localId']);
-    print(json.decode(response.body));
+    // print(json.decode(response.body)['localId']);
+    // print(json.decode(response.body));
+
+    final responseBody = json.decode(response.body);
+    if (responseBody['error'] != null) {
+      throw AuthException(responseBody['error']
+          ['message']); //message é a chave do erro retornado na colecao error
+    }
+
     return Future.value();
   }
 
   Future<void> cadastrarUsuario(String email, String password) async {
-    _authenticate(email, password, "signUp");
+    await _authenticate(email, password, "signUp");
   }
 
   Future<void> login(String email, String password) async {
-    _authenticate(email, password, "signInWithPassword");
+    await _authenticate(email, password, "signInWithPassword");
   }
 }

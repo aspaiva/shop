@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop/exceptions/auth_exception.dart';
 import 'package:shop/providers/auth.dart';
+import 'package:shop/utils/dialogs.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -38,10 +40,16 @@ class _AuthCardState extends State<AuthCard> {
 
     Auth auth = Provider.of(context, listen: false);
 
-    if (_authMode == AuthMode.Login) {
-      await auth.login(_authData['email'], _authData['password']);
-    } else {
-      await auth.cadastrarUsuario(_authData['email'], _authData['password']);
+    try {
+      if (_authMode == AuthMode.Login) {
+        await auth.login(_authData['email'], _authData['password']);
+      } else {
+        await auth.cadastrarUsuario(_authData['email'], _authData['password']);
+      }
+    } on AuthException catch (error) {
+      Dialogs().showErrorDialog(context, error.toString());
+    } catch (error) {
+      Dialogs().showErrorDialog(context, "Erro não esperado na autenticação");
     }
 
     setState(() {
